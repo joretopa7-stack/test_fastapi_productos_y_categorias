@@ -1,4 +1,30 @@
 # INSTRUCCIONES PARA LA EJECUCION DEL PROYECTO
+# Estructura
+```
+C:.
+│   .gitignore
+│   README..md
+│   requirements.txt
+│   
+├───app
+│       database.py
+│       main.py
+│       schemas.py
+│       __init__.py
+│       
+├───docs
+│       Actividad_Autonoma_API_Categorias_FastAPI.pdf
+│       CASOS_DE_PRUEBA.TXT
+│       
+├───Liteclient
+│       fast_api_productos_categorias.postman_collection.json
+│       
+└───tests
+        conftest.py
+        test_categories.py
+        test_products.py
+        __init__.py
+```
 ### 1.CREAR EL ENTORNO VIRTUAL
 ```
 python -m venv .venv
