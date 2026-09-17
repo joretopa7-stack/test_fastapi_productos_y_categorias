@@ -1,0 +1,52 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/ubuntu/products-api-real/test_fastapi_productos_y_categorias/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/ubuntu/products-api-real/test_fastapi_productos_y_categorias
+plugins: anyio-4.15.1
+collecting ... collected 33 items
+
+tests/test_categories.py::test_list_categories PASSED                    [  3%]
+tests/test_categories.py::test_get_existing_category PASSED              [  6%]
+tests/test_categories.py::test_get_non_existing_category PASSED          [  9%]
+tests/test_categories.py::test_get_invalid_id PASSED                     [ 12%]
+tests/test_categories.py::test_create_valid_category PASSED              [ 15%]
+tests/test_categories.py::test_create_category_name_too_short PASSED     [ 18%]
+tests/test_categories.py::test_create_category_missing_name PASSED       [ 21%]
+tests/test_categories.py::test_update_existing_category PASSED           [ 24%]
+tests/test_categories.py::test_update_non_existing_category PASSED       [ 27%]
+tests/test_categories.py::test_delete_existing_category PASSED           [ 30%]
+tests/test_categories.py::test_delete_non_existing_category PASSED       [ 33%]
+tests/test_categories.py::test_filter_active_categories PASSED           [ 36%]
+tests/test_categories.py::test_search_categories PASSED                  [ 39%]
+tests/test_categories.py::test_search_categories_no_match PASSED         [ 42%]
+tests/test_modulo_iv.py::test_cp001_create_product_valid PASSED          [ 45%]
+tests/test_modulo_iv.py::test_cp002_list_products PASSED                 [ 48%]
+tests/test_modulo_iv.py::test_cp003_get_existing_product PASSED          [ 51%]
+tests/test_modulo_iv.py::test_cp004_create_category_valid PASSED         [ 54%]
+tests/test_modulo_iv.py::test_cp005_get_non_existing_product PASSED      [ 57%]
+tests/test_modulo_iv.py::test_cp006_get_non_existing_category PASSED     [ 60%]
+tests/test_modulo_iv.py::test_cp007_reject_category_name_too_short PASSED [ 63%]
+tests/test_modulo_iv.py::test_cp008_reject_non_numeric_category_id PASSED [ 66%]
+tests/test_modulo_iv.py::test_cp009_accept_product_with_zero_stock PASSED [ 69%]
+tests/test_modulo_iv.py::test_cp010_reject_product_with_negative_stock PASSED [ 72%]
+tests/test_products.py::test_health PASSED                               [ 75%]
+tests/test_products.py::test_get_products PASSED                         [ 78%]
+tests/test_products.py::test_get_existing_product PASSED                 [ 81%]
+tests/test_products.py::test_get_non_existing_product PASSED             [ 84%]
+tests/test_products.py::test_create_product PASSED                       [ 87%]
+tests/test_products.py::test_update_product PASSED                       [ 90%]
+tests/test_products.py::test_update_product_stock_recalculates_available PASSED [ 93%]
+tests/test_products.py::test_delete_product PASSED                       [ 96%]
+tests/test_products.py::test_filters PASSED                              [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/ubuntu/products-api-real/test_fastapi_productos_y_categorias/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.12/site-packages/starlette/testclient.py:53
+  /home/ubuntu/products-api-real/test_fastapi_productos_y_categorias/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 33 passed, 2 warnings in 0.15s ========================

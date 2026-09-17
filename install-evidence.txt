@@ -1,0 +1,10 @@
+DEF-001 - Evidencia de instalación
+
+Comando ejecutado:
+python -m pip install -r requirements.txt
+
+Resultado observado:
+ERROR: No matching distribution found for truststore-0.10.4
+
+Conclusión:
+El archivo requirements.txt no permite instalar todas las dependencias declaradas en el entorno de ejecución disponible.

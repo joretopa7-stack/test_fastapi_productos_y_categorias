@@ -1,180 +1,314 @@
 # Casos de prueba
 
-## CP001 — Crear producto correctamente
+Los casos se diseñaron contra el contrato de TechStore API de la guía evaluable. `PASSED`, `FAILED`, `BLOCKED` y `NOT EXECUTED` se refieren a la ejecución de la auditoría documentada.
 
-**Tipo:** Positiva  
-**Requisito:** RF03  
-**Prioridad:** Alta  
-**Precondición:** La API está disponible y se puede enviar un producto válido.  
-**Datos:**
+## Etapa A — Categorías
 
-```json
-{"name":"Mouse Gamer","category":"Laptops","price":120.0,"stock":5,"available":true}
-```
+### CP-CAT-01 — Crear categoría válida
 
-**Pasos:**
+- **Requisito/regla:** RF01.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** `POST /categories`, `{"name":"Periféricos"}`.
+- **Pasos:** 1. Enviar la solicitud. 2. Revisar código y JSON.
+- **Resultado esperado:** HTTP 201 y objeto creado.
+- **Resultado obtenido:** HTTP 201 y categoría creada.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_cat_01_create_category_valid`.
 
-1. Ejecutar `POST /products`.
-2. Enviar el JSON indicado.
-3. Revisar la respuesta.
+### CP-CAT-02 — Listar categorías
 
-**Resultado esperado:** HTTP `201`; el producto se crea, contiene un ID y conserva los datos enviados.
+- **Requisito/regla:** RF02.
+- **Prioridad:** Media.
+- **Precondiciones:** Existe al menos una categoría.
+- **Datos de prueba:** `GET /categories`.
+- **Pasos:** 1. Ejecutar GET. 2. Verificar que la respuesta sea una lista.
+- **Resultado esperado:** HTTP 200 y lista de categorías.
+- **Resultado obtenido:** HTTP 200 y lista.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_cat_02_list_categories`.
 
-## CP002 — Consultar productos
+### CP-CAT-03 — Consultar categoría existente
 
-**Tipo:** Positiva  
-**Requisito:** RF01  
-**Prioridad:** Media  
-**Precondición:** El fixture contiene cinco productos.  
-**Datos:** No aplica.  
-**Pasos:**
+- **Requisito/regla:** RF03.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe categoría con ID 1.
+- **Datos de prueba:** `GET /categories/1`.
+- **Pasos:** 1. Ejecutar GET. 2. Revisar el ID devuelto.
+- **Resultado esperado:** HTTP 200 y categoría con ID 1.
+- **Resultado obtenido:** HTTP 200 y categoría con ID 1.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_cat_03_get_existing_category`.
 
-1. Ejecutar `GET /products/`.
-2. Revisar el código y el cuerpo de respuesta.
+### CP-CAT-04 — Consultar categoría inexistente
 
-**Resultado esperado:** HTTP `200`; se devuelve una lista con cinco productos.
+- **Requisito/regla:** RF04.
+- **Prioridad:** Alta.
+- **Precondiciones:** No existe el ID 99999.
+- **Datos de prueba:** `GET /categories/99999`.
+- **Pasos:** 1. Ejecutar GET. 2. Revisar el código.
+- **Resultado esperado:** HTTP 404.
+- **Resultado obtenido:** HTTP 404.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_cat_04_get_unknown_category_404`.
 
-## CP003 — Consultar producto por ID
+### CP-CAT-05 — Rechazar nombre menor a tres caracteres
 
-**Tipo:** Positiva  
-**Requisito:** RF02  
-**Prioridad:** Alta  
-**Precondición:** Existe el producto con ID `1`.  
-**Datos:** `product_id=1`.  
-**Pasos:**
+- **Requisito/regla:** RN01.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** `{"name":"AB"}`.
+- **Pasos:** 1. Enviar POST. 2. Revisar el código.
+- **Resultado esperado:** HTTP 422.
+- **Resultado obtenido:** HTTP 422.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_cat_05_category_name_too_short`.
 
-1. Ejecutar `GET /products/1`.
-2. Revisar la respuesta.
+### CP-CAT-06 — Aceptar nombre de exactamente tres caracteres
 
-**Resultado esperado:** HTTP `200`; el producto devuelto tiene `id=1`.
+- **Requisito/regla:** RN01.
+- **Prioridad:** Media.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** `{"name":"ABC"}`.
+- **Pasos:** 1. Enviar POST. 2. Revisar la respuesta.
+- **Resultado esperado:** HTTP 201.
+- **Resultado obtenido:** HTTP 201.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_cat_06_category_name_exactly_three_characters`.
 
-## CP004 — Crear categoría correctamente
+### CP-CAT-07 — Rechazar categoría duplicada ignorando mayúsculas
 
-**Tipo:** Positiva  
-**Requisito:** RF08  
-**Prioridad:** Media  
-**Precondición:** La API está disponible.  
-**Datos:**
+- **Requisito/regla:** RN02.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe una categoría `Audio`.
+- **Datos de prueba:** Crear `Audio` y luego `audio`.
+- **Pasos:** 1. Crear Audio. 2. Crear audio. 3. Revisar la segunda respuesta.
+- **Resultado esperado:** HTTP 409.
+- **Resultado obtenido:** HTTP 201; la implementación permite el duplicado.
+- **Estado:** FAILED.
+- **Automatización:** `test_cp_cat_07_duplicate_category_observed_behavior`.
+- **Defecto:** DEF-CAT-001.
 
-```json
-{"name":"Tablets","description":"Dispositivos táctiles","active":true}
-```
+## Etapa B — Productos
 
-**Pasos:**
+### CP-PROD-01 — Crear producto válido
 
-1. Ejecutar `POST /categories`.
-2. Enviar el JSON indicado.
-3. Revisar la respuesta.
+- **Requisito/regla:** RF05.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe categoría válida según el contrato.
+- **Datos de prueba:** `name=Mouse inalámbrico`, `price=120000`, `stock=5`, `category_id=1`.
+- **Pasos:** 1. Ejecutar POST `/products`. 2. Enviar JSON. 3. Revisar código.
+- **Resultado esperado:** HTTP 201 y producto asociado a categoría.
+- **Resultado obtenido:** No ejecutado contra el JSON contractual; la implementación usa `category` textual.
+- **Estado:** NOT EXECUTED.
 
-**Resultado esperado:** HTTP `201`; la categoría se crea con un ID generado.
+### CP-PROD-02 — Listar productos
 
-## CP005 — Rechazar producto inexistente
+- **Requisito/regla:** RF06.
+- **Prioridad:** Media.
+- **Precondiciones:** Existen productos.
+- **Datos de prueba:** `GET /products`.
+- **Pasos:** Ejecutar GET y revisar lista.
+- **Resultado esperado:** HTTP 200 y lista.
+- **Resultado obtenido:** HTTP 200 usando `/products/` con barra final.
+- **Estado:** FAILED.
+- **Defecto:** DEF-PROD-001.
 
-**Tipo:** Negativa  
-**Requisito:** RF02, RN06  
-**Prioridad:** Alta  
-**Precondición:** No existe el producto `999`.  
-**Datos:** `product_id=999`.  
-**Pasos:**
+### CP-PROD-03 — Consultar producto existente
 
-1. Ejecutar `GET /products/999`.
-2. Revisar la respuesta.
+- **Requisito/regla:** RF07.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe producto ID 1.
+- **Datos de prueba:** `GET /products/1`.
+- **Pasos:** Ejecutar GET y revisar ID.
+- **Resultado esperado:** HTTP 200 y producto ID 1.
+- **Resultado obtenido:** HTTP 200 y producto ID 1.
+- **Estado:** PASSED.
 
-**Resultado esperado:** HTTP `404`; el cuerpo es `{"detail":"Product not found"}`.
+### CP-PROD-04 — Consultar producto inexistente
 
-## CP006 — Rechazar categoría inexistente
+- **Requisito/regla:** RF08.
+- **Prioridad:** Alta.
+- **Precondiciones:** No existe ID 99999.
+- **Datos de prueba:** `GET /products/99999`.
+- **Pasos:** Ejecutar GET y revisar código.
+- **Resultado esperado:** HTTP 404.
+- **Resultado obtenido:** HTTP 404.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_prod_04_get_unknown_product_404`.
 
-**Tipo:** Negativa  
-**Requisito:** RF07, RN06  
-**Prioridad:** Alta  
-**Precondición:** No existe la categoría `999`.  
-**Datos:** `category_id=999`.  
-**Pasos:**
+### CP-PROD-05 — Actualizar producto válido
 
-1. Ejecutar `GET /categories/999`.
-2. Revisar la respuesta.
+- **Requisito/regla:** RF09.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe producto ID 1.
+- **Datos de prueba:** `PUT /products/1` con precio válido.
+- **Pasos:** Ejecutar PUT y consultar el producto.
+- **Resultado esperado:** HTTP 200 y datos actualizados.
+- **Resultado obtenido:** El endpoint PUT no está implementado; la implementación expone PATCH.
+- **Estado:** FAILED.
+- **Defecto:** DEF-PROD-002.
 
-**Resultado esperado:** HTTP `404`; el cuerpo es `{"detail":"Category not found"}`.
+### CP-PROD-06 — Actualizar producto inexistente
 
-## CP007 — Rechazar nombre de categoría corto
+- **Requisito/regla:** RF10.
+- **Prioridad:** Alta.
+- **Precondiciones:** No existe ID 99999.
+- **Datos de prueba:** `PUT /products/99999`.
+- **Pasos:** Ejecutar PUT y revisar código.
+- **Resultado esperado:** HTTP 404.
+- **Resultado obtenido:** No ejecutado con el método contractual.
+- **Estado:** NOT EXECUTED.
 
-**Tipo:** Negativa  
-**Requisito:** RF08, RN02  
-**Prioridad:** Alta  
-**Precondición:** La API está disponible.  
-**Datos:** `{"name":"AB"}`.  
-**Pasos:**
+### CP-PROD-07 — Eliminar producto existente
 
-1. Ejecutar `POST /categories`.
-2. Enviar el JSON indicado.
-3. Revisar la respuesta.
+- **Requisito/regla:** RF11.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe un producto creado para la prueba.
+- **Datos de prueba:** `DELETE /products/{id}`.
+- **Pasos:** Ejecutar DELETE y consultar el ID.
+- **Resultado esperado:** HTTP 204; el producto queda eliminado.
+- **Resultado obtenido:** HTTP 200 con el producto eliminado.
+- **Estado:** FAILED.
+- **Defecto:** DEF-PROD-003.
 
-**Resultado esperado:** HTTP `422`; la categoría no se crea.
+### CP-PROD-08 — Eliminar producto inexistente
 
-## CP008 — Rechazar ID no numérico
+- **Requisito/regla:** RF12.
+- **Prioridad:** Alta.
+- **Precondiciones:** No existe ID 99999.
+- **Datos de prueba:** `DELETE /products/99999`.
+- **Pasos:** Ejecutar DELETE y revisar código.
+- **Resultado esperado:** HTTP 404.
+- **Resultado obtenido:** No ejecutado en la suite evaluable.
+- **Estado:** NOT EXECUTED.
 
-**Tipo:** Negativa  
-**Requisito:** RN07  
-**Prioridad:** Alta  
-**Precondición:** La API está disponible.  
-**Datos:** `category_id=abc`.  
-**Pasos:**
+### CP-PROD-09 — Rechazar nombre menor a tres caracteres
 
-1. Ejecutar `GET /categories/abc`.
-2. Revisar la respuesta.
+- **Requisito/regla:** RN03.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto con `name=AB`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 422.
+- **Resultado obtenido:** HTTP 201; la implementación acepta el nombre de dos caracteres.
+- **Estado:** FAILED.
+- **Defecto:** DEF-PROD-001.
+- **Automatización:** `test_cp_prod_09_product_name_too_short`.
 
-**Resultado esperado:** HTTP `422`; FastAPI rechaza el parámetro de ruta.
+### CP-PROD-10 — Aceptar nombre exactamente de tres caracteres
 
-## CP009 — Aceptar stock igual a cero
+- **Requisito/regla:** RN03.
+- **Prioridad:** Media.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto con `name=ABC`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 201.
+- **Resultado obtenido:** HTTP 201.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_prod_10_product_name_exactly_three_characters`.
 
-**Tipo:** Frontera  
-**Requisito:** RF03, RN04  
-**Prioridad:** Alta  
-**Precondición:** La API está disponible.  
-**Datos:** Producto válido con `price=10.0` y `stock=0`.
+### CP-PROD-11 — Rechazar precio igual a cero
 
-```json
-{"name":"Producto sin existencias","category":"Laptops","price":10.0,"stock":0,"available":false}
-```
+- **Requisito/regla:** RN04.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto con `price=0`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 422.
+- **Resultado obtenido:** No ejecutado.
+- **Estado:** NOT EXECUTED.
 
-**Pasos:**
+### CP-PROD-12 — Rechazar precio negativo
 
-1. Ejecutar `POST /products`.
-2. Enviar el JSON indicado.
-3. Revisar la respuesta.
+- **Requisito/regla:** RN04.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto con `price=-1000`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 422.
+- **Resultado obtenido:** No ejecutado.
+- **Estado:** NOT EXECUTED.
 
-**Resultado esperado:** HTTP `201`; el producto se acepta porque el stock cero es el límite inferior permitido.
+### CP-PROD-13 — Aceptar precio mínimo positivo
 
-## CP010 — Rechazar stock negativo
+- **Requisito/regla:** RN04.
+- **Prioridad:** Media.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto con `price=0.01`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 201.
+- **Resultado obtenido:** No ejecutado.
+- **Estado:** NOT EXECUTED.
 
-**Tipo:** Frontera  
-**Requisito:** RF03, RN04  
-**Prioridad:** Alta  
-**Precondición:** La API está disponible.  
-**Datos:** Producto válido con `stock=-1`.
+### CP-PROD-14 — Aceptar stock igual a cero
 
-```json
-{"name":"Producto inválido","category":"Laptops","price":10.0,"stock":-1,"available":false}
-```
+- **Requisito/regla:** RN05, RN07.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto Monitor, `price=850000`, `stock=0`.
+- **Pasos:** Ejecutar POST `/products` y revisar stock.
+- **Resultado esperado:** HTTP 201; stock cero aceptado.
+- **Resultado obtenido:** HTTP 201; stock cero aceptado.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_prod_14_stock_zero_is_accepted`.
 
-**Pasos:**
+### CP-PROD-15 — Rechazar stock negativo
 
-1. Ejecutar `POST /products`.
-2. Enviar el JSON indicado.
-3. Revisar la respuesta.
+- **Requisito/regla:** RN05.
+- **Prioridad:** Alta.
+- **Precondiciones:** API disponible.
+- **Datos de prueba:** Producto con `stock=-1`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 422.
+- **Resultado obtenido:** HTTP 422.
+- **Estado:** PASSED.
+- **Automatización:** `test_cp_prod_15_negative_stock_is_rejected`.
 
-**Resultado esperado:** HTTP `422`; el producto no se crea porque el stock no puede ser negativo.
+### CP-PROD-16 — Rechazar categoría inexistente al crear
+
+- **Requisito/regla:** RN06.
+- **Prioridad:** Alta.
+- **Precondiciones:** No existe `category_id=99999`.
+- **Datos de prueba:** Producto con `category_id=99999`.
+- **Pasos:** Ejecutar POST `/products`.
+- **Resultado esperado:** HTTP 404.
+- **Resultado obtenido:** El esquema actual no usa `category_id`; no ejecutado contra el contrato.
+- **Estado:** NOT EXECUTED.
+
+### CP-PROD-17 — Rechazar precio inválido al actualizar
+
+- **Requisito/regla:** RN08.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe producto ID 1.
+- **Datos de prueba:** Actualización con `price=0`.
+- **Pasos:** Ejecutar PUT `/products/1`.
+- **Resultado esperado:** HTTP 422.
+- **Resultado obtenido:** No ejecutado con el método contractual.
+- **Estado:** NOT EXECUTED.
+
+### CP-PROD-18 — Rechazar categoría inexistente al actualizar
+
+- **Requisito/regla:** RN08, RN06.
+- **Prioridad:** Alta.
+- **Precondiciones:** Existe producto ID 1.
+- **Datos de prueba:** Actualización con `category_id=99999`.
+- **Pasos:** Ejecutar PUT `/products/1`.
+- **Resultado esperado:** HTTP 404 o 422 según validación.
+- **Resultado obtenido:** No ejecutado con el esquema contractual.
+- **Estado:** NOT EXECUTED.
 
 ## Resumen
 
-| Tipo | Casos | Total |
-|---|---|---:|
-| Positivos | CP001, CP002, CP003, CP004 | 4 |
-| Negativos | CP005, CP006, CP007, CP008 | 4 |
-| Frontera | CP009, CP010 | 2 |
-| **Total** | **CP001–CP010** | **10** |
+| Módulo | Casos diseñados | PASSED | FAILED | BLOCKED | NOT EXECUTED |
+|---|---:|---:|---:|---:|---:|
+| Categorías | 7 | 6 | 1 | 0 | 0 |
+| Productos | 18 | 7 | 3 | 0 | 8 |
+| **Total** | **25** | **13** | **4** | **0** | **8** |
 
 ## Referencias
 
-[1]: ../tests/test_modulo_iv.py "Automatización de los casos del Módulo IV"
-[2]: /home/ubuntu/upload/Guia_Modulo_IV_Plan_Pruebas.pdf "Guía del aprendiz: Plan y documentación de pruebas"
+[1]: ../app/main.py "Implementación auditada"
+[2]: ../app/schemas.py "Esquemas auditados"
+[3]: ../tests/test_auditoria_evaluable.py "Automatización trazable"
+[4]: /home/ubuntu/upload/Mini_Proyecto_Evaluable_Modulo_IV_Auditoria_Pruebas.pdf "Guía del mini-proyecto evaluable"

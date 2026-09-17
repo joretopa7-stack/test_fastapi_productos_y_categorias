@@ -1,155 +1,147 @@
-# Plan de Pruebas
+# Plan de pruebas
 
-## 1. Información general
+## 1. Identificación del proyecto
 
-Proyecto: Product API — productos y categorías  
-Versión: 1.0.0  
-Tecnologías: Python, FastAPI, Pydantic, pytest, TestClient y Uvicorn  
-Responsable de pruebas: Jorge Alejandro Torres Paez  
-Fecha: 17/09/2026  
-Persistencia: listas en memoria `products_db` y `category_db`  
-Aplicación: `app.main:app`
+| Campo | Información |
+|---|---|
+| Proyecto | TechStore API — Products & Categories |
+| Versión auditada | 1.0.0 |
+| Aprendiz | Jorge Alejandro Torres Paez |
+| Fecha de inicio | 17/09/2026 |
+| Fecha de entrega | 17/09/2026 |
+| Repositorio | `test_fastapi_productos_y_categorias` |
+| Aplicación | `app.main:app` |
 
-## 2. Objetivo
+## 2. Objetivo de la auditoría
 
-Verificar que la API de productos y categorías cumpla los requisitos funcionales y las reglas de negocio establecidas, considerando entradas válidas, inválidas y casos límite. La ejecución se realizará mediante pruebas funcionales automatizadas con pytest y TestClient.
+Determinar, mediante evidencia trazable, si la implementación de la API cumple el contrato funcional de TechStore para categorías y productos. La auditoría relaciona requisitos, riesgos, casos, automatización pytest, resultados observados, defectos, retest, regresión y criterios de salida.
 
 ## 3. Alcance
 
-### Incluido
+### Etapa A: Categorías
 
-- `GET /health` para comprobar el estado de la API.
-- `GET /products/` para consultar productos.
-- `GET /products/{product_id}` para consultar un producto por ID.
-- `POST /products` para crear productos.
-- `PATCH /products/{product_id}` para actualizar productos parcialmente.
-- `DELETE /products/{product_id}` para eliminar productos.
-- `GET /categories` para consultar y filtrar categorías.
-- `GET /categories/{category_id}` para consultar una categoría por ID.
-- `POST /categories` para crear categorías.
-- `PATCH /categories/{category_id}` para actualizar categorías parcialmente.
-- `DELETE /categories/{category_id}` para eliminar categorías.
-- Códigos HTTP, estructura JSON y validaciones Pydantic.
-- Filtros por `category`, `available`, `search` y `active`.
+Se auditan RF01–RF04 y RN01–RN02 mediante `POST /categories`, `GET /categories` y `GET /categories/{id}`.
+
+### Etapa B: Productos
+
+Se auditan RF05–RF12 y RN03–RN08 mediante creación, consulta, actualización, eliminación y validaciones de productos.
+
+### Endpoints contractuales
+
+| ID | Método | Endpoint | Éxito esperado |
+|---|---|---|---:|
+| EP01 | POST | `/categories` | 201 |
+| EP02 | GET | `/categories` | 200 |
+| EP03 | GET | `/categories/{id}` | 200 |
+| EP04 | POST | `/products` | 201 |
+| EP05 | GET | `/products` | 200 |
+| EP06 | GET | `/products/{id}` | 200 |
+| EP07 | PUT | `/products/{id}` | 200 |
+| EP08 | DELETE | `/products/{id}` | 204 |
+
+### Diferencias observadas de implementación
+
+La implementación usa `PATCH` para actualizar productos, `/products/` para listar productos y devuelve HTTP `200` con el producto eliminado. Además, usa `category` como texto en lugar de `category_id`. Estas diferencias se auditan contra el contrato de la guía y se registran como defectos o riesgos cuando corresponde.
 
 ### Fuera de alcance
 
-- Autenticación y autorización.
-- Rendimiento, carga y estrés.
-- Seguridad especializada.
-- Interfaz gráfica.
-- Despliegue en producción.
-- Persistencia en una base de datos externa.
+Autenticación, rendimiento, carga, estrés, seguridad especializada, interfaz gráfica, despliegue productivo y persistencia externa.
 
-## 4. Requisitos y reglas de negocio
+## 4. Requisitos y reglas del contrato
 
-| ID | Tipo | Descripción |
-|---|---|---|
-| RF01 | Requisito funcional | Consultar productos. |
-| RF02 | Requisito funcional | Consultar un producto por ID. |
-| RF03 | Requisito funcional | Crear un producto. |
-| RF04 | Requisito funcional | Actualizar parcialmente un producto. |
-| RF05 | Requisito funcional | Eliminar un producto. |
-| RF06 | Requisito funcional | Consultar categorías. |
-| RF07 | Requisito funcional | Consultar una categoría por ID. |
-| RF08 | Requisito funcional | Crear una categoría. |
-| RF09 | Requisito funcional | Actualizar parcialmente una categoría. |
-| RF10 | Requisito funcional | Eliminar una categoría. |
-| RN01 | Regla de negocio | El nombre del producto debe tener entre 2 y 100 caracteres. |
-| RN02 | Regla de negocio | El nombre de la categoría debe tener entre 3 y 50 caracteres. |
-| RN03 | Regla de negocio | El precio debe ser mayor que cero. |
-| RN04 | Regla de negocio | El stock no puede ser negativo. |
-| RN05 | Regla de negocio | Los campos obligatorios no pueden omitirse. |
-| RN06 | Regla de negocio | Un recurso inexistente debe responder HTTP 404. |
-| RN07 | Regla de negocio | Un ID no numérico debe responder HTTP 422. |
+| ID | Descripción |
+|---|---|
+| RF01 | Crear una categoría válida. |
+| RF02 | Listar categorías registradas. |
+| RF03 | Consultar una categoría existente por ID. |
+| RF04 | Responder 404 al consultar categoría inexistente. |
+| RF05 | Crear producto válido asociado a categoría existente. |
+| RF06 | Listar productos registrados. |
+| RF07 | Consultar producto existente por ID. |
+| RF08 | Responder 404 al consultar producto inexistente. |
+| RF09 | Actualizar producto existente con datos válidos. |
+| RF10 | Responder 404 al actualizar producto inexistente. |
+| RF11 | Eliminar producto existente. |
+| RF12 | Responder 404 al eliminar producto inexistente. |
+| RN01 | Nombre de categoría obligatorio, entre 3 y 60 caracteres. |
+| RN02 | Nombre de categoría no repetido sin distinguir mayúsculas/minúsculas; respuesta 409. |
+| RN03 | Nombre de producto obligatorio, entre 3 y 80 caracteres. |
+| RN04 | Precio estrictamente mayor que 0. |
+| RN05 | Stock mayor o igual que 0. |
+| RN06 | `category_id` corresponde a categoría existente; si no, 404. |
+| RN07 | Stock igual a 0 debe aceptarse. |
+| RN08 | La actualización conserva las validaciones de creación. |
 
 ## 5. Riesgos
 
-| ID | Riesgo | Probabilidad | Impacto | Prioridad |
-|---|---|---|---|---|
-| R01 | Permitir stock negativo. | Media | Alto | Alta |
-| R02 | Permitir precio cero o negativo. | Media | Alto | Alta |
-| R03 | Consultar un recurso inexistente y obtener respuesta exitosa. | Alta | Medio | Alta |
-| R04 | Aceptar nombres de categoría menores al mínimo. | Media | Medio | Media |
-| R05 | Aceptar un ID no numérico. | Media | Medio | Alta |
-| R06 | Contaminar datos entre casos de prueba. | Media | Alto | Alta |
+| ID | Riesgo | Probabilidad | Impacto | Prioridad | Casos mitigadores |
+|---|---|---|---|---|---|
+| R01 | Permitir categoría duplicada con diferente capitalización. | Media | Alto | Alta | CP-CAT-07 |
+| R02 | Aceptar nombres menores al mínimo. | Alta | Medio | Alta | CP-CAT-05, CP-PROD-09 |
+| R03 | Aceptar precio cero o negativo. | Media | Alto | Alta | CP-PROD-11, CP-PROD-12 |
+| R04 | Aceptar stock negativo. | Media | Alto | Alta | CP-PROD-15 |
+| R05 | No validar categoría inexistente. | Media | Alto | Alta | CP-PROD-16, CP-PROD-18 |
+| R06 | Usar método o código HTTP diferente al contrato. | Alta | Alto | Crítica | CP-PROD-05, CP-PROD-07 |
+| R07 | Consultar, actualizar o eliminar IDs inexistentes incorrectamente. | Media | Alto | Alta | CP-CAT-04, CP-PROD-04, CP-PROD-06, CP-PROD-08 |
+| R08 | Contaminar datos entre pruebas. | Media | Alto | Alta | Fixture `reset_db` |
 
 ## 6. Estrategia
 
-Se realizarán pruebas funcionales, positivas, negativas y de frontera. Las verificaciones repetibles se automatizarán con pytest y TestClient.
+Se aplican pruebas funcionales positivas, negativas y de frontera. Los casos se diseñan antes de automatizarse. Se automatiza una selección representativa con pytest y TestClient, conservando el ID del caso en el nombre del test. Los fallos se clasifican primero como problema de prueba, datos, ambiente o defecto del producto.
 
-La distribución principal exigida para este módulo es la siguiente:
+## 7. Ambiente y herramientas
 
-| Tipo | Casos |
-|---|---:|
-| Positivos | 4 |
-| Negativos | 4 |
-| Frontera | 2 |
-| Total | 10 |
+| Elemento | Configuración |
+|---|---|
+| Sistema operativo | Linux |
+| Python | 3.12.3 |
+| FastAPI | 0.141.1 |
+| Pydantic | 2.13.5 |
+| pytest | 9.1.1 |
+| Cliente | `fastapi.testclient.TestClient` |
+| Datos | Listas en memoria reiniciadas por fixture |
+| Comando principal | `python -m pytest -v` |
 
-Los casos se identifican como `CP001` a `CP010`. La regresión completa de la suite existente se ejecutará después de los diez casos del módulo.
-
-## 7. Ambiente
-
-Sistema operativo: Linux  
-Lenguaje: Python 3.12.3  
-Framework: FastAPI 0.141.1  
-Servidor: Uvicorn 0.52.0  
-Framework de pruebas: pytest 9.1.1  
-Cliente HTTP: `fastapi.testclient.TestClient`  
-Base de datos de pruebas: listas en memoria reiniciadas mediante `tests/conftest.py`
-
-No se ejecutan pruebas destructivas contra producción. El fixture `reset_db` restaura los productos y las categorías antes de cada prueba.
+El `requirements.txt` actual presenta un defecto de reproducibilidad: declara `truststore-0.10.4`, paquete que no pudo instalarse en el ambiente auditado. La evidencia se conserva en `install-evidence.txt`.
 
 ## 8. Datos de prueba
 
-| Escenario | Datos relevantes | Resultado esperado |
-|---|---|---|
-| Producto válido | `price=120.00`, `stock=5`, `category=Laptops` | Aceptado |
-| Categoría válida | `name=Tablets`, `active=true` | Aceptada |
-| Producto inexistente | `id=999` | HTTP 404 |
-| Categoría inexistente | `id=999` | HTTP 404 |
-| Categoría inválida | `name=AB` | HTTP 422 |
-| ID inválido | `category_id=abc` | HTTP 422 |
-| Stock frontera válido | `stock=0` | Aceptado |
-| Stock frontera inválido | `stock=-1` | Rechazado |
+Categorías: `Periféricos`, `Audio`, `Computadores` y `Accesorios`.  
+Producto válido: `Mouse inalámbrico`, precio `120000`, stock `5`.  
+Producto frontera: `Monitor`, precio `850000`, stock `0`.  
+ID inexistente: `99999`.  
+Precio frontera inválido: `0`.  
+Precio inválido: `-1000`.  
+Stock inválido: `-1`.
 
 ## 9. Criterios de entrada
 
-- La API puede importarse correctamente.
-- Los endpoints del alcance están implementados.
-- pytest está instalado.
-- TestClient puede inicializarse.
-- Existe un ambiente de pruebas aislado.
-- Los fixtures reinician los datos antes de cada caso.
+La API debe poder importarse, pytest debe recolectar las pruebas, TestClient debe inicializarse, los fixtures deben reiniciar el estado y el contrato RF/RN debe estar disponible.
 
 ## 10. Criterios de suspensión
 
-- La API no puede iniciar o importarse.
-- TestClient no puede inicializarse.
-- El ambiente de pruebas no está disponible.
-- Los fixtures no pueden restablecer el estado.
-- Existe un defecto bloqueante que impide ejecutar los casos críticos.
+Se suspende si la aplicación no importa, el ambiente no permite ejecutar pytest, los datos no se reinician o un defecto bloqueante impide ejecutar la mayoría de los casos críticos.
 
 ## 11. Criterios de reanudación
 
-- El defecto bloqueante fue corregido.
-- El ambiente está disponible nuevamente.
-- La versión corregida fue instalada.
-- Los datos de prueba fueron reiniciados.
-- El caso que provocó la suspensión está listo para retest.
+Se reanuda después de corregir la causa bloqueante, instalar la versión corregida, restablecer los datos y repetir el caso que provocó la suspensión.
 
 ## 12. Criterios de salida
 
-- 100 % de los casos del Módulo IV ejecutados.
+- Cobertura documental del 100 % de RF01–RF12 y RN01–RN08.
+- 100 % de casos críticos y al menos 90 % del total ejecutados.
 - 0 defectos críticos abiertos.
-- Al menos 95 % de casos aprobados.
-- Reglas de negocio críticas verificadas.
-- Retest y regresión ejecutados cuando exista una corrección.
+- Mínimo 15 casos automatizados.
+- Al menos 90 % de casos ejecutados aprobados.
+- Todo defecto trazable a caso y requisito/regla.
+
+## 13. Roles y responsables
+
+El aprendiz responsable diseña casos, ejecuta pruebas, conserva evidencias, analiza fallos y actualiza los cinco documentos. La revisión final debe verificar que las métricas coincidan con la salida real de pytest.
 
 ## Referencias
 
-[1]: ../app/main.py "Implementación de endpoints FastAPI"
-[2]: ../app/schemas.py "Esquemas Pydantic"
-[3]: ../tests/conftest.py "Fixtures del ambiente de pruebas"
-[4]: /home/ubuntu/upload/Guia_Modulo_IV_Plan_Pruebas.pdf "Guía del aprendiz: Plan y documentación de pruebas"
+[1]: ../app/main.py "Implementación real de TechStore API"
+[2]: ../app/schemas.py "Esquemas Pydantic reales"
+[3]: ../tests/conftest.py "Fixtures de pruebas"
+[4]: /home/ubuntu/upload/Mini_Proyecto_Evaluable_Modulo_IV_Auditoria_Pruebas.pdf "Mini proyecto evaluable: Auditoría completa de pruebas"

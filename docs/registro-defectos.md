@@ -1,49 +1,154 @@
 # Registro de defectos
 
-## DEF-001
+La guía indica registrar defectos reales y no inventarlos. Los siguientes defectos se confirmaron comparando el comportamiento observado con el contrato evaluable y con la salida de pytest.
 
-**Título:** El archivo `requirements.txt` no permite instalar todas las dependencias declaradas.
+## DEF-CAT-001
 
-**Severidad:** Media  
-**Prioridad:** Alta  
-**Endpoint:** No aplica; defecto de configuración del proyecto  
-**Caso relacionado:** Criterio de entrada del plan  
-**Requisito afectado:** Disponibilidad reproducible del ambiente de pruebas  
-**Estado:** Abierto
+**Título:** La API permite crear categorías duplicadas ignorando la regla de mayúsculas y minúsculas.  
+**Requisito/regla:** RN02.  
+**Caso relacionado:** CP-CAT-07.  
+**Severidad:** Alta.  
+**Prioridad:** Alta.  
+**Estado:** Abierto.  
+**Ambiente/versión:** Python 3.12.3, FastAPI 0.141.1, versión 1.0.0.
 
-**Precondición:** Python 3.x y un entorno virtual nuevo.
+### Precondición
 
-**Pasos para reproducir:**
+La API está disponible y el fixture reinicia la lista de categorías.
 
-1. Crear un entorno virtual con `python3 -m venv .venv`.
-2. Activarlo.
-3. Ejecutar `python -m pip install -r requirements.txt`.
+### Pasos para reproducir
 
-**Resultado esperado:** Todas las dependencias declaradas se instalan correctamente y el ambiente queda listo para ejecutar pytest.
+1. Ejecutar `POST /categories` con `{"name":"Audio"}`.
+2. Ejecutar nuevamente `POST /categories` con `{"name":"audio"}`.
+3. Revisar la segunda respuesta.
 
-**Resultado obtenido:** La instalación falla porque no se encuentra `truststore-0.10.4` para el entorno disponible. Para ejecutar las pruebas fue necesario instalar manualmente las dependencias funcionales compatibles.
+### Resultado esperado
 
-**Evidencia:** La ejecución de instalación devolvió `No matching distribution found for truststore-0.10.4`; se conserva en [`install-evidence.txt`](../install-evidence.txt).
+HTTP `409`, porque el nombre duplicado debe rechazarse sin distinguir mayúsculas de minúsculas.
 
-**Causa probable:** Nombre o versión de paquete incorrectos en `requirements.txt`.
+### Resultado obtenido
 
-**Corrección aplicada:** No aplicada durante este ciclo.
+HTTP `201`; la implementación crea la segunda categoría.
 
-**Retest:** Pendiente. Después de corregir `requirements.txt`, repetir la instalación desde un entorno virtual limpio y ejecutar `python -m pytest -v tests/test_modulo_iv.py`.
+### Evidencia
 
-**Regresión:** Pendiente de la corrección. Ejecutar `python -m pytest -v` después del retest.
+`tests/test_auditoria_evaluable.py::test_cp_cat_07_duplicate_category_observed_behavior` falló con `assert 201 == 409`.
 
-## Severidad y prioridad
+### Retest y regresión
 
-La severidad es **media** porque el defecto no afecta directamente el comportamiento de los endpoints una vez instaladas las dependencias, pero impide reproducir el ambiente mediante el procedimiento documentado. La prioridad es **alta** porque bloquea la preparación normal del proyecto para otro aprendiz o integrante del equipo.
+No aplica todavía. No se ha aplicado una corrección. Cuando se corrija, debe ejecutarse primero `pytest -v -k cp_cat_07` y luego `pytest -v`.
 
-## Estado de la ejecución funcional
+## DEF-PROD-001
 
-No se confirmaron defectos funcionales en los diez casos del Módulo IV: los diez casos pasaron. El defecto DEF-001 corresponde al ambiente de instalación y permanece abierto.
+**Título:** La API acepta nombres de producto menores a tres caracteres.  
+**Requisito/regla:** RN03.  
+**Caso relacionado:** CP-PROD-09.  
+**Severidad:** Alta.  
+**Prioridad:** Alta.  
+**Estado:** Abierto.  
+**Ambiente/versión:** Python 3.12.3, FastAPI 0.141.1, versión 1.0.0.
+
+### Precondición
+
+La API está disponible.
+
+### Pasos para reproducir
+
+1. Ejecutar `POST /products`.
+2. Enviar un producto con `name=AB`, `price=10` y `stock=1`.
+3. Revisar la respuesta.
+
+### Resultado esperado
+
+HTTP `422`, porque el nombre debe tener entre 3 y 80 caracteres.
+
+### Resultado obtenido
+
+HTTP `201`; el producto se crea con un nombre de dos caracteres.
+
+### Evidencia
+
+`tests/test_auditoria_evaluable.py::test_cp_prod_09_product_name_too_short` falló con `assert 201 == 422`.
+
+### Retest y regresión
+
+No aplica todavía. No se ha aplicado una corrección. Cuando se corrija, debe ejecutarse `pytest -v -k cp_prod_09` y luego `pytest -v`.
+
+## DEF-PROD-002
+
+**Título:** La actualización de productos no expone el método contractual PUT.  
+**Requisito/regla:** RF09 y RN08.  
+**Caso relacionado:** CP-PROD-05, CP-PROD-06, CP-PROD-17 y CP-PROD-18.  
+**Severidad:** Alta.  
+**Prioridad:** Alta.  
+**Estado:** Abierto.  
+**Ambiente/versión:** Python 3.12.3, FastAPI 0.141.1, versión 1.0.0.
+
+### Pasos para reproducir
+
+1. Ejecutar `PUT /products/1` con un cuerpo válido.
+2. Revisar la respuesta y la documentación de rutas.
+
+### Resultado esperado
+
+HTTP `200` y producto actualizado mediante PUT.
+
+### Resultado obtenido
+
+La implementación declara `PATCH /products/{product_id}` y no declara PUT.
+
+### Evidencia
+
+La ruta está implementada como `@app.patch("/products/{product_id}")` en `app/main.py`.
+
+### Retest y regresión
+
+Pendientes de una corrección. Después de corregir, ejecutar CP-PROD-05, los casos de actualización inválida y la suite completa.
+
+## DEF-PROD-003
+
+**Título:** La eliminación de productos devuelve HTTP 200 en lugar de HTTP 204.  
+**Requisito/regla:** RF11.  
+**Caso relacionado:** CP-PROD-07.  
+**Severidad:** Media.  
+**Prioridad:** Alta.  
+**Estado:** Abierto.  
+**Ambiente/versión:** Python 3.12.3, FastAPI 0.141.1, versión 1.0.0.
+
+### Pasos para reproducir
+
+1. Crear un producto.
+2. Ejecutar `DELETE /products/{id}`.
+3. Revisar el código HTTP.
+
+### Resultado esperado
+
+HTTP `204`.
+
+### Resultado obtenido
+
+HTTP `200` con el objeto eliminado.
+
+### Evidencia
+
+La implementación de `delete_product` devuelve el producto y no declara `status_code=204`; la prueba existente confirma HTTP 200.
+
+### Retest y regresión
+
+Pendientes de una corrección. Después de corregir, ejecutar CP-PROD-07 y la suite completa.
+
+## Resumen de defectos
+
+| Severidad | Abiertos | Defectos |
+|---|---:|---|
+| Crítica | 0 | — |
+| Alta | 3 | DEF-CAT-001, DEF-PROD-001, DEF-PROD-002 |
+| Media | 1 | DEF-PROD-003 |
 
 ## Referencias
 
-[1]: ../requirements.txt "Dependencias declaradas del proyecto"
-[2]: ../modulo-iv-evidence.txt "Evidencia de ejecución de los 10 casos"
-[3]: ../pytest-evidence-final.txt "Evidencia de regresión"
-[4]: /home/ubuntu/upload/Guia_Modulo_IV_Plan_Pruebas.pdf "Guía del aprendiz: Plan y documentación de pruebas"
+[1]: ../tests/test_auditoria_evaluable.py "Pruebas de auditoría evaluable"
+[2]: ../app/main.py "Implementación auditada"
+[3]: ../app/schemas.py "Validaciones implementadas"
+[4]: ../auditoria-evaluable-evidence.txt "Salida de pytest de la auditoría"
+[5]: /home/ubuntu/upload/Mini_Proyecto_Evaluable_Modulo_IV_Auditoria_Pruebas.pdf "Guía evaluable"

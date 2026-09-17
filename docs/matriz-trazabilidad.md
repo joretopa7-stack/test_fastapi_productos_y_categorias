@@ -1,48 +1,45 @@
 # Matriz de trazabilidad
 
-## 1. Relación requisito–caso de prueba
+La matriz conserva los IDs del contrato de TechStore y relaciona cada requisito o regla con al menos un caso diseñado.
 
-| ID requisito | Requisito / regla | Caso(s) relacionado(s) |
-|---|---|---|
-| RF01 | Consultar productos | CP002 |
-| RF02 | Consultar producto por ID | CP003, CP005 |
-| RF03 | Crear producto | CP001, CP009, CP010 |
-| RF04 | Actualizar parcialmente un producto | No cubierto por los 10 casos del Módulo IV |
-| RF05 | Eliminar un producto | No cubierto por los 10 casos del Módulo IV |
-| RF06 | Consultar categorías | No cubierto por los 10 casos del Módulo IV |
-| RF07 | Consultar categoría por ID | CP006 |
-| RF08 | Crear categoría | CP004, CP007 |
-| RF09 | Actualizar parcialmente una categoría | No cubierto por los 10 casos del Módulo IV |
-| RF10 | Eliminar una categoría | No cubierto por los 10 casos del Módulo IV |
-| RN01 | Nombre del producto entre 2 y 100 caracteres | No cubierto explícitamente |
-| RN02 | Nombre de la categoría entre 3 y 50 caracteres | CP007 |
-| RN03 | Precio mayor que cero | No cubierto explícitamente |
-| RN04 | Stock mayor o igual que cero | CP009, CP010 |
-| RN05 | Campos obligatorios presentes | CP001, CP004 |
-| RN06 | Recurso inexistente no se devuelve como válido | CP005, CP006 |
-| RN07 | ID no numérico responde HTTP 422 | CP008 |
+| ID | Descripción corta | Caso(s) | Estado de cobertura |
+|---|---|---|---|
+| RF01 | Crear categoría válida | CP-CAT-01 | Cubierto |
+| RF02 | Listar categorías | CP-CAT-02 | Cubierto |
+| RF03 | Consultar categoría existente | CP-CAT-03 | Cubierto |
+| RF04 | Consultar categoría inexistente con 404 | CP-CAT-04 | Cubierto |
+| RF05 | Crear producto válido asociado | CP-PROD-01 | Cubierto |
+| RF06 | Listar productos | CP-PROD-02 | Cubierto |
+| RF07 | Consultar producto existente | CP-PROD-03 | Cubierto |
+| RF08 | Consultar producto inexistente con 404 | CP-PROD-04 | Cubierto |
+| RF09 | Actualizar producto válido | CP-PROD-05 | Cubierto; defecto de método PUT/PATCH |
+| RF10 | Actualizar producto inexistente con 404 | CP-PROD-06 | Cubierto; no ejecutado |
+| RF11 | Eliminar producto existente | CP-PROD-07 | Cubierto; defecto de código 200/204 |
+| RF12 | Eliminar producto inexistente con 404 | CP-PROD-08 | Cubierto; no ejecutado |
+| RN01 | Nombre de categoría obligatorio y de 3 a 60 caracteres | CP-CAT-05, CP-CAT-06 | Cubierto |
+| RN02 | Nombre de categoría no duplicado, sin distinguir mayúsculas | CP-CAT-07 | Cubierto; incumplimiento observado |
+| RN03 | Nombre de producto obligatorio y de 3 a 80 caracteres | CP-PROD-09, CP-PROD-10 | Cubierto |
+| RN04 | Precio estrictamente mayor que 0 | CP-PROD-11, CP-PROD-12, CP-PROD-13 | Cubierto; no ejecutado |
+| RN05 | Stock mayor o igual que 0 | CP-PROD-14, CP-PROD-15 | Cubierto |
+| RN06 | `category_id` debe existir | CP-PROD-16, CP-PROD-18 | Cubierto; diferencia de contrato |
+| RN07 | Stock igual a 0 debe aceptarse | CP-PROD-14 | Cubierto |
+| RN08 | Actualización conserva validaciones de creación | CP-PROD-17, CP-PROD-18 | Cubierto; no ejecutado |
 
-## 2. Relación caso–prueba automatizada
+## Relación con automatización
 
-| Caso | Test automatizado |
+| Archivo | Casos automatizados |
 |---|---|
-| CP001 | `test_cp001_create_product_valid` |
-| CP002 | `test_cp002_list_products` |
-| CP003 | `test_cp003_get_existing_product` |
-| CP004 | `test_cp004_create_category_valid` |
-| CP005 | `test_cp005_get_non_existing_product` |
-| CP006 | `test_cp006_get_non_existing_category` |
-| CP007 | `test_cp007_reject_category_name_too_short` |
-| CP008 | `test_cp008_reject_non_numeric_category_id` |
-| CP009 | `test_cp009_accept_product_with_zero_stock` |
-| CP010 | `test_cp010_reject_product_with_negative_stock` |
+| `tests/test_auditoria_evaluable.py` | CP-CAT-01 a CP-CAT-07; CP-PROD-01, 02, 03, 04, 05, 07, 09, 10, 14 y 15 |
+| `tests/test_categories.py` | Pruebas adicionales de categorías existentes |
+| `tests/test_products.py` | Pruebas adicionales de productos existentes |
 
-## 3. Revisión de huecos de cobertura
+## Verificación
 
-La matriz demuestra la cobertura de los diez casos seleccionados para el Módulo IV. Los requisitos RF04, RF05, RF06, RF09 y RF10 pertenecen al alcance general de la API, pero no forman parte de los diez casos mínimos de esta actividad. También deberán añadirse casos específicos para RN01 y RN03 si se requiere cobertura completa de todas las validaciones Pydantic.
+La cobertura documental es del 100 %: los 12 requisitos funcionales y las 8 reglas de negocio tienen al menos un caso relacionado. La cobertura de ejecución del diseño completo es parcial porque diez casos de producto requieren adaptar la implementación al contrato antes de ejecutarse de forma válida.
 
 ## Referencias
 
 [1]: ./plan-pruebas.md "Plan de pruebas"
-[2]: ../tests/test_modulo_iv.py "Tests automatizados del Módulo IV"
-[3]: /home/ubuntu/upload/Guia_Modulo_IV_Plan_Pruebas.pdf "Guía del aprendiz: Plan y documentación de pruebas"
+[2]: ./casos-prueba.md "Casos de prueba"
+[3]: ../tests/test_auditoria_evaluable.py "Suite automatizada de auditoría"
+[4]: /home/ubuntu/upload/Mini_Proyecto_Evaluable_Modulo_IV_Auditoria_Pruebas.pdf "Guía evaluable"
